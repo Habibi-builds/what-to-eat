@@ -19,7 +19,7 @@ On this Windows machine, you can also double-click `start-app.cmd` after depende
 
 - 27 Nigerian recipes with ingredient quantities, editable illustrative prices and nutritional estimates.
 - Budget-constrained daily and weekly plans, quick meals, replacements, favorites, recent eaten history and kitchen-aware ranking.
-- An animated food wheel with a meal review and payment flow: spin, review recipes, confirm the actual amount paid, and see the monthly balance update. Reconfirming a day replaces its payment instead of creating a duplicate. Plans can also be saved without payment.
+- An animated food wheel for one selected breakfast, lunch or dinner. Review its recipe, confirm the actual amount paid, and update the monthly balance. Updating a payment replaces only that meal slot. Older whole-day payments remain in Spending. Plans can also be saved without payment.
 - Monthly budget, actual purchase tracking, daily and weekly totals and spending charts.
 - Kitchen stock, a quantity-aware weekly shopping list, recipe details and manual meal selection.
 - Local storage persistence, JSON backup export and automatic monthly budget rollover.
