@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {basePrices,meals} from './foods.ts';
+import {recommend,cost,shoppingList} from './engine.ts';
+import {budgetInfo} from './budget.ts';
+import {recordDailyPayment} from './payments.ts';
+test('confirming daily meals deducts the payment from this month',()=>{const expenses=recordDailyPayment([],'2026-11-12',1000,50000);assert.equal(budgetInfo(50000,expenses,'2026-11-12').remaining,49000)});
+test('confirming again replaces the daily payment instead of charging twice',()=>{const first=recordDailyPayment([],'2026-11-12',1000,50000);const updated=recordDailyPayment(first,'2026-11-12',800,50000);assert.equal(updated.length,1);assert.equal(budgetInfo(50000,updated,'2026-11-12').spent,800)});
+test('already purchased kitchen ingredients can have zero new spending',()=>{assert.equal(recordDailyPayment([],'2026-11-12',0,50000)[0].amount,0)});
+test('meal payment rejects negative amounts and spending beyond the monthly balance',()=>{assert.throws(()=>recordDailyPayment([],'2026-11-12',-1,50000));assert.throws(()=>recordDailyPayment([],'2026-11-12',50001,50000))});
+test('daily plan never exceeds allowance, including depleted budgets',()=>{for(const limit of [0,100,500,1000,1666,4000]){for(let seed=0;seed<20;seed++){const plan=recommend(limit,basePrices,[],[],false,[],seed);assert.ok(plan.reduce((n,id)=>n+(id?cost(meals.find(m=>m.id===id)!,basePrices):0),0)<=limit)}}});
+test('affordable full days reserve enough for all three slots',()=>{assert.equal(recommend(1000,basePrices,[],[]).filter(Boolean).length,3)});
+test('quick meal constraint is respected',()=>{recommend(2000,basePrices,[],[],true).forEach(id=>{if(id)assert.ok(meals.find(m=>m.id===id)!.time<=25)})});
+test('stock is subtracted once across a whole week',()=>{const list=shoppingList({'2026-11-12':['bread','bread']},basePrices,[{id:'1',name:'Bread',quantity:1,unit:'portion'}]);assert.equal(list.find(i=>i.name==='Bread')?.quantity,1);assert.equal(list.find(i=>i.name==='Milk')?.quantity,1)});
+test('budget ignores other months and includes today in remaining days',()=>{const info=budgetInfo(50000,[{id:'1',name:'Rice',amount:12000,category:'Market expenses',date:'2026-11-01'},{id:'2',name:'Old',amount:5000,category:'Other',date:'2026-10-01'}],'2026-11-12');assert.equal(info.remaining,38000);assert.equal(info.left,19);assert.equal(info.daily,2000)});
+test('month boundary resets totals without erasing purchases',()=>{assert.equal(budgetInfo(50000,[{id:'1',name:'Rice',amount:12000,category:'Other',date:'2026-11-12'}],'2026-12-01').spent,0)});
